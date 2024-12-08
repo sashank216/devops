@@ -1,0 +1,351 @@
+Databases Primer
+
+. Databases provide organized and persistent storage for your data
+
+. To choose between different databses types, we would need to understand
+
+  -> Availability
+  -> Durability
+  -> Consistency
+  -> Transactions etc
+
+
+Database - Getting Started
+
+Database - Snapshots (If the data is crashed) to another data centre
+
+Database - Transaction logs
+
+To database and create a process to copy it over to the second data centre
+
+Databse - Add a standby 
+
+Standby database in the second data centre with replication
+
+-------------------------------------------------------------------
+
+Availability and Durability
+  
+4 9's - 99.99 - good
+11 9's - 99.99999999 - good
+
+
+Increasing Availabillity and Durability of Databases
+
+. Increasing Availability:
+ -> Have multiple standys available
+    -> in multiple AZs
+    -> in multiple Regions
+
+. Increasing Durability:
+ -> Multiple copies of data( standbys, snapshots, transaction logs and replicas)
+    -> in multiple AZs
+    -> in multiple Regions
+
+ -> Replicating data comes with its own challenges
+
+------------------------------------------------------------------------------
+Database Terminology : RTO and RPO
+
+RPO ( Recovery Point Objective ): Maxium acceptable period of data loss
+RTO ( Recovery Time Objective) ; Maximum acceptable downtime
+
+-----------------------------------------------------------------
+
+Reporting and Analytics Applications
+
+. New reporting and analytics applications are being launched using the same database
+
+-> These applications will only read data
+ .. Vertical scale the dataabse - increase CPU and memory
+ .. Create a database cluster - typically database clusters are expensive to setip
+ .. Create read replicas - run read only applications against read replicas
+
+
+Database - Read Replicas
+
+.Connect reporting and analytics applications to read replica
+. reduces load on the master databases
+. Upgrade read replica to master database
+. Create read replicas in multiple regions
+. Take snapshots from read replicas
+
+-----------------------------------------------------------------------------
+
+Consistency
+
+. Strong Consistency - Synchronous replication to all replicas 
+  -> Will be slow if you have multiple replicas or standbys
+
+. Eventual consistecy - Asynchronous replication. A littile lag - few seconds - before the change is availble in all replicas
+  - In the intermediate period, different replicas might return different values
+  - used when scalabilty is more important than data integrity
+  - Examples : social media posts
+
+. Read-after-write consistency - Inserts are immediately availbale.
+updates and deletes are eventually consistent
+
+---> Amazon S3 provides read-after-write consistency
+
+------------------------------------------------------------------
+
+Database Categories
+
+. There are several categoies of databases
+ -> Relational(OLTP and OLAP) , Document, Key Value, graph etc
+
+. Choosing type of database for your use case is not easy. 
+based on fixed schema, transaction properties,latency, no of transactions, how much data
+
+-----------------------------------------------------------------------------
+
+Relational Databases
+
+. Predefined Schema - tables and relationships
+. Supports complex SQL Queries
+. Strong transacrional capabilties
+. used for ONline Transaction Processing (OLTP)
+. Used in OLAP ( Online NAalytics Processing)
+
+------------------------------------------------------------------------
+
+OLTP ( Relational Databases)
+
+. Aplications where there are large number of small transactions
+. Use cases: ERP, CRM< e-commerece bankinkg applications
+
+Amazon RDS(relational Database Service)
+
+-> Amazon Aurora etc...
+
+. Multiple AZ deployment
+. Read replicas:
+ -> Same AZ
+ -> Multi AZ
+ -> Cross region
+
+. Storage auto scaling ( up to a configured limit)
+. Automated backups ( restore to point in time)
+. Manual snapshots
+
+
+------------------------------------------------------------------------
+
+Amazon Aurora
+
+. 2 Copies of data each in aminimum of 3AZ
+. Provides "Global Database" option
+ ------------------------------------------------------------------
+
+Amaozn RDS-  Use Amazon RDS for transactional application needing
+             -> Pre-defined schema
+             -> Strong transactional capabilties
+             -> Complex queries
+
+not recommended - heavy customizations, upload files, high scalable
+
+----------------------------------------------------------------------------
+
+OLAP 
+
+. Applications allowing users to anamyze petabutes of data
+examples: reporitng applications, data ware houses
+
+. Sample application: Decide insurance premiums analyzing data from past
+
+. OLAP and OLTP use similar data structure
+. Different approach in how data is stored
+. OLTP databases use row storage
+
+-------------------------------------------------------------------
+
+Amazon Redshift
+
+. Redshift is a relational database ( tables and relationships)
+
+. OLAP ( reads>> writes on dbs)
+
+. redshift is a petabute-scale distributed data ware house based on PostgreSQl
+
+Redshift
+
+-> Massively paraller processing - storage and processing can be split across multiple nodes
+-> Coloumnar data storage
+-> High data compression
+
+use cases: ETL(Extract, Transform, Load) 
+
+------------------------------------------------------------
+
+Amazon EMR - Elastc MapReduce
+
+.  Managed Hadoop service with high availability and durability
+.  EMR gives access to underlying OS => You can SSh into it
+. Use cases: Log processing for insights etc....
+
+Hadoop in AWS - Amaozn EMR
+
+-------------------------------------------------------------------
+
+
+Document Database
+
+. Structure data the way your application needs it
+. Create one table instead of doens
+. Quickly evolving semi structured data(Schema-less)
+. Easily distributable
+. Advantages : (Horizonatlly) Scalable to terabytes of data with millisecond responses 
+                upto millions of transactions per second
+. Use cases : Content management, catalogs, user profiles
+
+--------------------------------------------------------------
+
+
+Key-Value - Equal to hashmap
+
+
+. Use a simple key-value pair to store data. Key is a unique idenitfier.
+. Values can be objects, compound objects or simple data values
+. Advantages: (Horizontally) Scalable to terabytes of data with millisecond
+responses upto milions of transactions per second
+. Use cases: Shopping carts, sessionstores etc..
+
+------------------------------------------------------------------
+
+
+Amazon DynamoDB
+
+. Fats, scalable, distributed for any scale
+. Flexible NoSQl,Key-Value and document database ( Schemealess)
+. Single-digit millionsecond reponse for million of TPS
+. Do not worry about scaling, availability or durability
+  -> Automatically partitions data as it grows
+  -> Maintains 3 replicas within same region
+. No need to provision a database
+  -> Create a table and configure read and write capacity (RCU and WCU)
+  -> Automatically scales to meet your RCU and WCU
+. Provides an expensive serverless mode
+. Use cases: Shopping carts, sessionstores etc..
+
+
+. Hierarchy: Table> item(S) > attribute(key value pair)
+. Mandatory primary key
+. Other than the primary key, tables are schemaless
+ -> No need to define the other attributes or types
+ -> Each item in a table can have a strinct attirbutes
+low consistency
+
+Only for smaller objects -> 400 kb
+
+
+for bigger objects use  only S3
+---------------------------------------------------------------
+
+In-memory Databases (or Caches)
+
+. Retrieving data from memory is much faster from retrieving data from disk
+. You can speed up dynamic database-driven websites by caching data and objects in memory.
+
+ Ex: Memcached.
+
+. You can deliver microsecond latency by storing persistent data in memory
+  Ex: Redis
+
+. Use cases: Caching, session management, gaming leader boards, geospatial 
+             applications
+
+
+
+--------------------------------------------------------------------------
+
+
+Amazon ElastiCache
+
+. Highly scalable and low latency in-memory data store
+. Used fro distributed caching
+. ElastiCache Memcached:
+ -> Low maintenance simple caching solution
+ -> Easy horizontal scaling with auto discovery
+ -> USe cse: Speed up database-driven websites by caching data
+
+. ElastiCache Radis:
+ -> Persistenc
+ -> Advanced Features.
+    -> Publish subscribe messaging
+    -> Read replicas and failover
+    -> Encryption
+
+-> Usecases: gaming leader boards, queues, real-time analytics
+
+
+
+Graph Databses  -> Amazon Neptune  -> Store and navigate data with complex relationships social networking data ( Twitter, fb) fraud detection
+
+-----------------------------------------------------------------------------
+
+
+Other Storage Services
+
+. Amazon DocumentDB
+ -> Managed document db service
+ -> Compatible with MongoDB
+
+. Amazon Keyspaces
+ -> Managed service for Apache Cassandra
+ -> Serverless
+
+. AWS Backup
+ -> Centrally manage and automate backups across AWS services
+ -> Automate backup compilance and monitoring
+
+----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
